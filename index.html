@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Record HLS Stream</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+
+<input type="text" id="streamURL" placeholder="Enter m3u8 url here" />
+<button id="startButton">Start Playing</button>
+<button id="recordButton" disabled>Start Recording</button>
+<button id="stopButton" disabled>Stop Recording</button>
+<video id="video" controls></video>
+
+<script src="recorder.js"></script>
+<script>
+    const video = document.getElementById('video');
+    const startButton = document.getElementById('startButton');
+    const recordButton = document.getElementById('recordButton');
+    const stopButton = document.getElementById('stopButton');
+    const streamURLInput = document.getElementById('streamURL');
+
+    startButton.addEventListener('click', () => {
+        let streamURL = streamURLInput.value;
+        if(Hls.isSupported()) {
+            let hls = new Hls();
+            hls.loadSource(streamURL);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                video.play();
+                recordButton.disabled = false;
+            });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = streamURL;
+            video.addEventListener('loadedmetadata', function() {
+                video.play();
+                recordButton.disabled = false;
+            });
+        }
+    });
+
+    recordButton.addEventListener('click', () => {
+        startRecording(video);
+        recordButton.disabled = true;
+        stopButton.disabled = false;
+    });
+
+    stopButton.addEventListener('click', () => {
+        stopRecording();
+        recordButton.disabled = false;
+        stopButton.disabled = true;
+    });
+
+</script>
+</body>
+</html>
